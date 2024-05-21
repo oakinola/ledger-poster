@@ -1,0 +1,67 @@
+# This file is used to specify which files/filetypes to ignore in Git.
+
+# Project related #
+###################
+*.ipr
+*.iws
+*.iml
+.idea/
+classes/
+app/.attach*
+.gitcrypt/
+.project
+.settings
+
+# Maven
+target/
+ledger-poster-app/target
+dependency-reduced-pom.xml
+
+# gradle
+.gradle
+
+
+librarian_roles
+tmp
+galaxy
+
+
+
+.DS_Store
+/repo_key
+
+
+
+#HELP.md
+#target/
+#!.mvn/wrapper/maven-wrapper.jar
+#!**/src/main/**/target/
+#!**/src/test/**/target/
+#
+#### STS ###
+#.apt_generated
+#.classpath
+#.factorypath
+#.project
+#.settings
+#.springBeans
+#.sts4-cache
+#
+#### IntelliJ IDEA ###
+#.idea
+#*.iws
+#*.iml
+#*.ipr
+#
+#### NetBeans ###
+#/nbproject/private/
+#/nbbuild/
+#/dist/
+#/nbdist/
+#/.nb-gradle/
+#build/
+#!**/src/main/**/build/
+#!**/src/test/**/build/
+#
+#### VS Code ###
+#.vscode/
