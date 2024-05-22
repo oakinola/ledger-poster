@@ -17,6 +17,8 @@ target/
 ledger-poster-app/target
 dependency-reduced-pom.xml
 
+mongo/database/
+
 # gradle
 .gradle
 
