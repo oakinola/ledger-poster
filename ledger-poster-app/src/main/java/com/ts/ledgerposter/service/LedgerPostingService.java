@@ -27,13 +27,13 @@ public class LedgerPostingService {
         return transaction;
     }
 
-
-    public double getAccountBalance(String accountNumber, LocalDateTime timestamp) {
-
-            return ledgerEntries.stream()
-                    .filter(entry -> entry.getRecordTimestamp().equals(timestamp)
-                        && entry.getTransactionAccount().getAccountNo().equals(accountNumber))
-                    .mapToDouble(entry -> entry.getTransactionType().getValue() * entry.getAmount())
-                    .sum();
-    }
+//
+//    public double getAccountBalance(String accountNumber, LocalDateTime timestamp) {
+//
+//            return ledgerEntries.stream()
+//                    .filter(entry -> entry.getRecordTimestamp().equals(timestamp)
+//                        && entry.getTransactionAccount().getAccountNo().equals(accountNumber))
+//                    .mapToDouble(entry -> entry.getTransactionType().getValue() * entry.getAmount())
+//                    .sum();
+//    }
 }

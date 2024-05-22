@@ -13,6 +13,6 @@
 
 	<modules>
 		<module>ledger-poster-app</module>
-	</modules>
+    </modules>
 
 </project>
