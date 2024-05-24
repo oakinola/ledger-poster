@@ -37,7 +37,8 @@ public class LedgerAccountProjector {
     private void processEvent(LedgerAccountPostedEventDTO eventDTO) {
         LedgerAccountTransactionDTO ledgerAccountTransactionDTO = LedgerAccountMapper.buildLedgerAccountTransactionDTOFromLedgerAccountPostedEventDTO(eventDTO);
 
-        Optional<LedgerAccount> optionalLedgerAccount = ledgerAccountRepository.findById(ledgerAccountTransactionDTO.id());
+        Optional<LedgerAccount> optionalLedgerAccount = ledgerAccountRepository.findByAccountNumber(ledgerAccountTransactionDTO.accountNumber());
+        //Optional<LedgerAccount> optionalLedgerAccount = ledgerAccountRepository.findById(ledgerAccountTransactionDTO.id());
         if (optionalLedgerAccount.isPresent()) {
             LedgerAccount transactionAccount = optionalLedgerAccount.get();
             transactionAccount.setAccountName(ledgerAccountTransactionDTO.accountName());

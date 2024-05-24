@@ -10,4 +10,5 @@ import java.util.UUID;
 
 public interface LedgerAccountRepository extends JpaRepository<LedgerAccount, UUID> {
     Optional<LedgerAccount> findByAccountNumberAndLastUpdated(String accountNumber, LocalDateTime timestamp);
+    Optional<LedgerAccount> findByAccountNumber(String accountNumber);
 }
