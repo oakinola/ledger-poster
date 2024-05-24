@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-@Document(collection = "ledger_entries")
 public class LedgerEntry {
     private LedgerAccount transactionAccount;
     private double transactionAmount;

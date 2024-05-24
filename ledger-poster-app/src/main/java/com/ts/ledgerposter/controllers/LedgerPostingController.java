@@ -4,9 +4,9 @@ import com.ts.ledgerposter.cqrs.commands.PostLedgerEntryCommand;
 import com.ts.ledgerposter.cqrs.queries.GetAccountBalanceQuery;
 import com.ts.ledgerposter.domain.LedgerEntry;
 import com.ts.ledgerposter.dto.LedgerAccountBalanceDTO;
-import com.ts.ledgerposter.dto.LedgerAccountDTO;
 import com.ts.ledgerposter.service.LedgerPostingCommandHandler;
 import com.ts.ledgerposter.service.LedgerPostingQueryHandler;
+import com.ts.ledgerposter.validators.LedgerPostingValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -30,18 +30,20 @@ public class LedgerPostingController {
 
     private final LedgerPostingCommandHandler commandHandler;
     private final LedgerPostingQueryHandler queryHandler;
+    private final LedgerPostingValidator validator;
 
     @GetMapping(value = "/account-balance/{accountNumber}")
     public ResponseEntity<LedgerAccountBalanceDTO> getAccountBalance(@PathVariable String accountNumber, @RequestParam String timestamp) {
+        validator.validateGetBalanceRequest(accountNumber, timestamp);
         LocalDateTime datetime = LocalDateTime.parse(timestamp, DateTimeFormatter.ISO_DATE_TIME);
         final var result = queryHandler.handle(new GetAccountBalanceQuery(accountNumber, datetime));
         log.info("Get account balance result: '{}'", result);
         return ResponseEntity.ok(result);
     }
 
-
     @PostMapping(value = "/post-ledger")
     public ResponseEntity<Void> postLedgerEntry(@RequestBody List<LedgerEntry> ledgerEntries) {
+        validator.validatePostLedgerEntryRequest(ledgerEntries);
         commandHandler.handle(new PostLedgerEntryCommand(ledgerEntries));
         log.info("The entries '{}' have been posted to the ledger successfully", ledgerEntries);
         return ResponseEntity.ok().build();
