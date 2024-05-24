@@ -26,4 +26,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleAccountNotFoundException(LedgerAccountNotFoundException ex, WebRequest request) {
         return handleExceptionInternal(ex, new ErrorResponseDTO("LPS_0001", String.format("Account specified not found: %s", ex.getAccountNumber())), new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
+
+    @ExceptionHandler(InvalidLedgerPostingDataException.class)
+    protected ResponseEntity<Object> handleInvalidLedgerPostingDataException(InvalidLedgerPostingDataException ex, WebRequest request) {
+        return handleExceptionInternal(ex, new ErrorResponseDTO("LPS_0002", ex.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
 }

@@ -2,9 +2,11 @@ package com.ts.ledgerposter.controllers;
 
 import com.ts.ledgerposter.cqrs.queries.GetAccountBalanceQuery;
 import com.ts.ledgerposter.dto.LedgerAccountBalanceDTO;
+import com.ts.ledgerposter.exceptions.InvalidLedgerPostingDataException;
 import com.ts.ledgerposter.exceptions.LedgerAccountNotFoundException;
 import com.ts.ledgerposter.service.LedgerPostingCommandHandler;
 import com.ts.ledgerposter.service.LedgerPostingQueryHandler;
+import com.ts.ledgerposter.validators.LedgerPostingValidator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -36,6 +38,9 @@ class LedgerPostingControllerIntegrationTest {
     @MockBean
     private LedgerPostingQueryHandler queryHandler;
 
+    @MockBean
+    private LedgerPostingValidator validator;
+
     @Test
     void shouldGetTheAccountBalance() throws Exception {
         LedgerAccountBalanceDTO balanceDTO = new LedgerAccountBalanceDTO("1000", 100.0);
@@ -52,7 +57,7 @@ class LedgerPostingControllerIntegrationTest {
     }
 
     @Test
-    public void givenInvalidAccountNumber_shouldReturnNotFoundStatus() throws Exception {
+    public void givenNoneExistingAccountNumber_shouldReturnNotFoundStatus() throws Exception {
 
         LocalDateTime datetime = LocalDateTime.parse("2024-05-22T23:00:00", DateTimeFormatter.ISO_DATE_TIME);
         when(queryHandler.handle(new GetAccountBalanceQuery("1033", datetime))).thenThrow(new LedgerAccountNotFoundException("1033", datetime));
@@ -64,6 +69,21 @@ class LedgerPostingControllerIntegrationTest {
                 .andExpect(jsonPath("$.description", is("Account specified not found: 1033")))
                 .andDo(print());
     }
+
+    @Test
+    public void givenInvalidParams_shouldReturnBadRequestStatus() throws Exception {
+
+        LocalDateTime datetime = LocalDateTime.parse("2024-05-22T23:00:00", DateTimeFormatter.ISO_DATE_TIME);
+        when(queryHandler.handle(new GetAccountBalanceQuery("1033", datetime))).thenThrow(new InvalidLedgerPostingDataException("Invalid data format passed in"));
+
+        mockMvc.perform(get("/v1/account-balance/1033")
+                        .param("timestamp", "2024-05-22T23:00:00"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode", is("LPS_0002")))
+                .andExpect(jsonPath("$.description", is("Invalid data format passed in")))
+                .andDo(print());
+    }
+
 
     @Test
     void shouldPostLedgerEntryAndReturnOK() throws Exception {

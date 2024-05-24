@@ -1,6 +1,5 @@
 package com.ts.ledgerposter.controllers;
 
-import com.ts.ledgerposter.cqrs.commands.PostLedgerEntryCommand;
 import com.ts.ledgerposter.cqrs.queries.GetAccountBalanceQuery;
 import com.ts.ledgerposter.domain.LedgerAccount;
 import com.ts.ledgerposter.domain.LedgerEntry;
@@ -8,9 +7,7 @@ import com.ts.ledgerposter.domain.TransactionType;
 import com.ts.ledgerposter.dto.LedgerAccountBalanceDTO;
 import com.ts.ledgerposter.service.LedgerPostingCommandHandler;
 import com.ts.ledgerposter.service.LedgerPostingQueryHandler;
-import com.ts.ledgerposter.service.LedgerPostingService;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.util.Lists;
+import com.ts.ledgerposter.validators.LedgerPostingValidator;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
@@ -19,26 +16,26 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Objects;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 class LedgerPostingControllerUnitTest {
 
     private final String timestamp = "2024-05-21T00:00:00";
-    LocalDateTime datetime = LocalDateTime.parse(timestamp, DateTimeFormatter.ISO_DATE_TIME);
+    LocalDateTime test_datetime = LocalDateTime.parse(timestamp, DateTimeFormatter.ISO_DATE_TIME);
 
-    private LedgerPostingCommandHandler commandHandler = Mockito.mock(LedgerPostingCommandHandler.class);
-    private LedgerPostingQueryHandler queryHandler = Mockito.mock(LedgerPostingQueryHandler.class);
+    private final LedgerPostingCommandHandler commandHandler = Mockito.mock(LedgerPostingCommandHandler.class);
+    private final LedgerPostingQueryHandler queryHandler = Mockito.mock(LedgerPostingQueryHandler.class);
+    private final LedgerPostingValidator validator = Mockito.mock(LedgerPostingValidator.class);
 
-    private LedgerPostingController controller = new LedgerPostingController(commandHandler, queryHandler);
+    private final LedgerPostingController controller = new LedgerPostingController(commandHandler, queryHandler, validator);
 
     @Test
     void shouldReturnAccountBalance() {
         LedgerAccountBalanceDTO balanceDTO = new LedgerAccountBalanceDTO("1000", 100);
-        when(queryHandler.handle(new GetAccountBalanceQuery("1000", datetime))).thenReturn(balanceDTO);
+        when(queryHandler.handle(new GetAccountBalanceQuery("1000", test_datetime))).thenReturn(balanceDTO);
         ResponseEntity<LedgerAccountBalanceDTO> result = controller.getAccountBalance("1000", timestamp);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -48,16 +45,20 @@ class LedgerPostingControllerUnitTest {
     @Test
     void shouldPostLedgerAndReturnOK() {
         List<LedgerEntry> ledgerEntries = List.of(
-                new LedgerEntry(LedgerAccount.builder()
-                        .accountNumber("1000")
-                        .accountName("test")
-                        .build(),
-                100,  TransactionType.CR, "Something", LocalDateTime.now()),
-                new LedgerEntry(LedgerAccount.builder()
-                        .accountNumber("1100")
-                        .accountName("test2")
-                        .build(),
-                100, TransactionType.CR, "description", LocalDateTime.now()));
+                new LedgerEntry(new LedgerAccount(
+                        UUID.randomUUID(),
+                        "1000",
+                        "test",
+                        0.0,
+                        null),
+                        100,  TransactionType.CR, "Something", test_datetime),
+                new LedgerEntry(new LedgerAccount(
+                        UUID.randomUUID(),
+                        "1100",
+                        "test2",
+                        0.0,
+                        null),
+                        100,  TransactionType.CR, "Something", test_datetime));
 
         ResponseEntity<Void> result = controller.postLedgerEntry(ledgerEntries);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
