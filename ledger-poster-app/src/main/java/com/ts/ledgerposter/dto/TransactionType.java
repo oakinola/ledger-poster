@@ -1,4 +1,4 @@
-package com.ts.ledgerposter.domain;
+package com.ts.ledgerposter.dto;
 
 public enum TransactionType {
     CR(1),

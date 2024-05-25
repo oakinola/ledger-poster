@@ -1,12 +1,11 @@
 package com.ts.ledgerposter.validators;
 
-import com.ts.ledgerposter.domain.LedgerAccount;
-import com.ts.ledgerposter.domain.LedgerEntry;
+import com.ts.ledgerposter.dto.LedgerTransactionDTO;
+import com.ts.ledgerposter.dto.TransactionType;
 import com.ts.ledgerposter.exceptions.InvalidLedgerPostingDataException;
 import io.micrometer.common.util.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -17,14 +16,14 @@ public class LedgerPostingValidator {
 
     public void validateGetBalanceRequest(String accountNumber, String timestamp) {
         checkNotEmpty(accountNumber);
-        checkValidAccountFormat(accountNumber);
         checkNotEmpty(timestamp);
+        checkValidAccountFormat(accountNumber);
         checkTimeStampFormat(timestamp);
     }
 
-    public void validatePostLedgerEntryRequest(List<LedgerEntry> ledgerEntries) {
-        validateLedgerEntries(ledgerEntries);
-        validateEntriesAreGood(ledgerEntries);
+    public void validatePostLedgerEntryRequest(List<LedgerTransactionDTO> transactions) {
+        validateTransactionsSize(transactions);
+        validateTransactionsAreGood(transactions);
     }
 
     private void checkNotEmpty(String stringValue) {
@@ -34,7 +33,7 @@ public class LedgerPostingValidator {
     }
 
     private void checkValidAccountFormat(String accountNumber) {
-        try{
+        try {
             Long.parseLong(accountNumber);
         } catch (NumberFormatException nfe) {
             throw new InvalidLedgerPostingDataException("Invalid account number sent");
@@ -42,54 +41,64 @@ public class LedgerPostingValidator {
     }
 
     private void checkTimeStampFormat(String timestamp) {
-        try{
+        try {
             LocalDateTime.parse(timestamp, DateTimeFormatter.ISO_DATE_TIME);
         } catch (DateTimeParseException dtpe) {
             throw new InvalidLedgerPostingDataException("Invalid timestamp format sent");
         }
     }
 
-    private void validateLedgerEntries(List<LedgerEntry> ledgerEntries) {
-        if (ledgerEntries == null || ledgerEntries.size() != 2) {
-            throw new InvalidLedgerPostingDataException("Incomplete ledger entries. There should be at least 2 ledger entries");
+    private void validateTransactionsSize(List<LedgerTransactionDTO> transactions) {
+        if (transactions == null || transactions.size() != 2) {
+            throw new InvalidLedgerPostingDataException("Incomplete ledger transactions. There should be at least 2 transactions");
         }
     }
 
-    private void validateEntriesAreGood(List<LedgerEntry> ledgerEntries)  {
-        checkAccountNumberPresentAndDiffers(ledgerEntries);
-        checkAmountsSumUpToZero(ledgerEntries);
-        checkTransactionDatesAreSame(ledgerEntries);
+    private void validateTransactionsAreGood(List<LedgerTransactionDTO> transactions)  {
+        checkAccountNumberPresentAndDiffers(transactions);
+        checkTransactionTypePresent(transactions);
+        checkAmountsSumUpToZero(transactions);
+        checkTransactionDatesAreSame(transactions);
     }
 
-    private void checkAccountNumberPresentAndDiffers(List<LedgerEntry> ledgerEntries) {
-        LedgerAccount account1 = ledgerEntries.get(0).getTransactionAccount();
-        LedgerAccount account2 = ledgerEntries.get(1).getTransactionAccount();
+    private void checkAccountNumberPresentAndDiffers(List<LedgerTransactionDTO> transactions) {
+        String accountNumber1 = transactions.get(0).getAccountNumber();
+        String accountNumber2 = transactions.get(1).getAccountNumber();
 
-        if (StringUtils.isEmpty(account1.getAccountNumber()) || StringUtils.isEmpty(account2.getAccountNumber())){
-            throw new InvalidLedgerPostingDataException("Missing Account Number! ");
+        if (StringUtils.isEmpty(accountNumber1) || StringUtils.isEmpty(accountNumber2)){
+            throw new InvalidLedgerPostingDataException("Missing Account Number!");
         }
 
-        if (account1.getAccountNumber().equals(account2.getAccountNumber())){
-            throw new InvalidLedgerPostingDataException("Accounts to be credited and debited must differ! ");
+        if (accountNumber1.equals(accountNumber2)){
+            throw new InvalidLedgerPostingDataException("Accounts to be credited and debited must differ!");
         }
     }
 
-    private void checkTransactionDatesAreSame(List<LedgerEntry> ledgerEntries) {
-        LocalDateTime transactionTime1 = ledgerEntries.get(0).getTransactionTime();
-        LocalDateTime transactionTime2 = ledgerEntries.get(1).getTransactionTime();
+    private void checkTransactionTypePresent(List<LedgerTransactionDTO> transactions) {
+        TransactionType transactionType1 = transactions.get(0).getTransactionType();
+        TransactionType transactionType2 = transactions.get(1).getTransactionType();
+
+        if (transactionType1 == null || transactionType2 == null){
+            throw new InvalidLedgerPostingDataException("Missing transaction type!");
+        }
+    }
+
+    private void checkTransactionDatesAreSame(List<LedgerTransactionDTO> transactions) {
+        String transactionTime1 = transactions.get(0).getTransactionTime();
+        String transactionTime2 = transactions.get(1).getTransactionTime();
 
         if (!transactionTime1.equals(transactionTime2)) {
             throw new InvalidLedgerPostingDataException("Transaction Date must be same for both entries");
         }
     }
 
-    private void checkAmountsSumUpToZero(List<LedgerEntry> ledgerEntries) {
-        double sum = 0;
-        for (LedgerEntry entry : ledgerEntries) {
-            sum = sum + entry.getTransactionAmount() * entry.getTransactionType().getValue();
+    private void checkAmountsSumUpToZero(List<LedgerTransactionDTO> transactions) {
+        double transactionsSum = 0;
+        for (LedgerTransactionDTO transaction : transactions) {
+            transactionsSum += transaction.getTransactionAmount() * transaction.getTransactionType().getValue();
         }
-        if ( sum != 0.0) {
-            throw new InvalidLedgerPostingDataException("Amount to be credited and debited ");
+        if ( transactionsSum != 0.0) {
+            throw new InvalidLedgerPostingDataException("Amount to be credited and debited must be same");
         }
     }
 }

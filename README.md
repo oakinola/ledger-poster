@@ -34,26 +34,22 @@ The following sample scripts serve as an example
  ```
     curl -X POST http://localhost:8082/ledger-poster/v1/post-ledger -H "Content-Type: application/json" -d '[
     {
-        "transactionAccount": {
-          "accountNumber": 1000,
-          "accountName": "Cash A/c"
-        },
-        "transactionAmount":1500,
-        "transactionType": "CR",
-        "description": "Purchase of machinery",
-        "transactionTime":"2024-05-23T23:00:00"
-      },
-      {
-        "transactionAccount": {
-          "accountNumber": 1200,
-          "accountName": "Machinery A/c"
-        },
-        "transactionAmount":1500,
-        "transactionType": "DB",
-        "description": "Purchase of machinery",
-        "transactionTime":"2024-05-23T23:00:00"
-      }
-    ]'
+    "accountNumber": "1700",
+    "accountName": "Cash A/c",
+    "transactionAmount":1550.0,
+    "transactionType": "CR",
+    "description": "Purchase of machinery",
+    "transactionTime":"2024-05-25T23:00:00"
+    },
+    {
+    "accountNumber": "1100",
+    "accountName": "Machinery A/c",
+    "transactionAmount":1550.0,
+    "transactionType": "DB",
+    "description": "Purchase of machinery",
+    "transactionTime":"2024-05-25T23:00:00"
+    }
+]'
  ```
 3. **Swagger can be access from the links below**
   ``` http://localhost:8082/ledger-poster/swagger-ui/index.html ```

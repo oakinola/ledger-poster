@@ -2,8 +2,8 @@ package com.ts.ledgerposter.controllers;
 
 import com.ts.ledgerposter.cqrs.commands.PostLedgerEntryCommand;
 import com.ts.ledgerposter.cqrs.queries.GetAccountBalanceQuery;
-import com.ts.ledgerposter.domain.LedgerEntry;
-import com.ts.ledgerposter.dto.LedgerAccountBalanceDTO;
+import com.ts.ledgerposter.dto.LedgerTransactionDTO;
+import com.ts.ledgerposter.dto.LedgerAccountBalanceResponseDTO;
 import com.ts.ledgerposter.service.LedgerPostingCommandHandler;
 import com.ts.ledgerposter.service.LedgerPostingQueryHandler;
 import com.ts.ledgerposter.validators.LedgerPostingValidator;
@@ -33,7 +33,7 @@ public class LedgerPostingController {
     private final LedgerPostingValidator validator;
 
     @GetMapping(value = "/account-balance/{accountNumber}")
-    public ResponseEntity<LedgerAccountBalanceDTO> getAccountBalance(@PathVariable String accountNumber, @RequestParam String timestamp) {
+    public ResponseEntity<LedgerAccountBalanceResponseDTO> getAccountBalance(@PathVariable String accountNumber, @RequestParam String timestamp) {
         validator.validateGetBalanceRequest(accountNumber, timestamp);
         LocalDateTime datetime = LocalDateTime.parse(timestamp, DateTimeFormatter.ISO_DATE_TIME);
         final var result = queryHandler.handle(new GetAccountBalanceQuery(accountNumber, datetime));
@@ -42,10 +42,10 @@ public class LedgerPostingController {
     }
 
     @PostMapping(value = "/post-ledger")
-    public ResponseEntity<Void> postLedgerEntry(@RequestBody List<LedgerEntry> ledgerEntries) {
-        validator.validatePostLedgerEntryRequest(ledgerEntries);
-        commandHandler.handle(new PostLedgerEntryCommand(ledgerEntries));
-        log.info("The entries '{}' have been posted to the ledger successfully", ledgerEntries);
+    public ResponseEntity<Void> postLedgerEntry(@RequestBody List<LedgerTransactionDTO> transactions) {
+        validator.validatePostLedgerEntryRequest(transactions);
+        commandHandler.handle(new PostLedgerEntryCommand(transactions));
+        log.info("The transactions '{}' have been posted to the ledger successfully", transactions);
         return ResponseEntity.ok().build();
     }
 }
