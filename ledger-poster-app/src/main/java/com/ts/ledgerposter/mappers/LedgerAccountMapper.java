@@ -1,7 +1,7 @@
 package com.ts.ledgerposter.mappers;
 
 import com.ts.ledgerposter.domain.LedgerAccount;
-import com.ts.ledgerposter.dto.LedgerAccountBalanceDTO;
+import com.ts.ledgerposter.dto.LedgerAccountBalanceResponseDTO;
 import com.ts.ledgerposter.dto.LedgerAccountPostedEventDTO;
 import com.ts.ledgerposter.dto.LedgerAccountTransactionDTO;
 import com.ts.ledgerposter.es.events.LedgerAccountPostedEvent;
@@ -34,8 +34,8 @@ public final class LedgerAccountMapper {
                 LocalDateTime.parse(eventDTO.lastUpdated(), DateTimeFormatter.ISO_DATE_TIME));
     }
 
-    public static LedgerAccountBalanceDTO buildLedgerAccountBalanceDTOFromLedgerAccount(LedgerAccount ledgerAccount) {
-        return new LedgerAccountBalanceDTO(
+    public static LedgerAccountBalanceResponseDTO buildLedgerAccountBalanceResponseDTOFromLedgerAccount(LedgerAccount ledgerAccount) {
+        return new LedgerAccountBalanceResponseDTO(
                 ledgerAccount.getAccountNumber(),
                 ledgerAccount.getAccountBalance()
         );

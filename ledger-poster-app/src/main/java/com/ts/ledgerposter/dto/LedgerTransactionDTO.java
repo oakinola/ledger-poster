@@ -1,18 +1,19 @@
-package com.ts.ledgerposter.domain;
+package com.ts.ledgerposter.dto;
 
+import com.ts.ledgerposter.domain.LedgerAccount;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-public class LedgerEntry {
-    private LedgerAccount transactionAccount;
+public class LedgerTransactionDTO {
+    private String accountNumber;
+    private String accountName;
     private double transactionAmount;
     private TransactionType transactionType;
     private String description;
-    private LocalDateTime transactionTime;
+    private String transactionTime;
 
 }

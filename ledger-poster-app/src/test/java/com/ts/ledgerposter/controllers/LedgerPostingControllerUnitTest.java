@@ -2,9 +2,9 @@ package com.ts.ledgerposter.controllers;
 
 import com.ts.ledgerposter.cqrs.queries.GetAccountBalanceQuery;
 import com.ts.ledgerposter.domain.LedgerAccount;
-import com.ts.ledgerposter.domain.LedgerEntry;
-import com.ts.ledgerposter.domain.TransactionType;
-import com.ts.ledgerposter.dto.LedgerAccountBalanceDTO;
+import com.ts.ledgerposter.dto.LedgerTransactionDTO;
+import com.ts.ledgerposter.dto.TransactionType;
+import com.ts.ledgerposter.dto.LedgerAccountBalanceResponseDTO;
 import com.ts.ledgerposter.service.LedgerPostingCommandHandler;
 import com.ts.ledgerposter.service.LedgerPostingQueryHandler;
 import com.ts.ledgerposter.validators.LedgerPostingValidator;
@@ -23,8 +23,8 @@ import static org.mockito.Mockito.when;
 
 class LedgerPostingControllerUnitTest {
 
-    private final String timestamp = "2024-05-21T00:00:00";
-    LocalDateTime test_datetime = LocalDateTime.parse(timestamp, DateTimeFormatter.ISO_DATE_TIME);
+    private final String STRING_TEST_TRANSACTION_TIME = "2024-05-21T00:00:00";
+    LocalDateTime LOCALDATE_TEST_TRANSACTION_TIME = LocalDateTime.parse(STRING_TEST_TRANSACTION_TIME, DateTimeFormatter.ISO_DATE_TIME);
 
     private final LedgerPostingCommandHandler commandHandler = Mockito.mock(LedgerPostingCommandHandler.class);
     private final LedgerPostingQueryHandler queryHandler = Mockito.mock(LedgerPostingQueryHandler.class);
@@ -34,9 +34,9 @@ class LedgerPostingControllerUnitTest {
 
     @Test
     void shouldReturnAccountBalance() {
-        LedgerAccountBalanceDTO balanceDTO = new LedgerAccountBalanceDTO("1000", 100);
-        when(queryHandler.handle(new GetAccountBalanceQuery("1000", test_datetime))).thenReturn(balanceDTO);
-        ResponseEntity<LedgerAccountBalanceDTO> result = controller.getAccountBalance("1000", timestamp);
+        LedgerAccountBalanceResponseDTO balanceDTO = new LedgerAccountBalanceResponseDTO("1000", 100);
+        when(queryHandler.handle(new GetAccountBalanceQuery("1000", LOCALDATE_TEST_TRANSACTION_TIME))).thenReturn(balanceDTO);
+        ResponseEntity<LedgerAccountBalanceResponseDTO> result = controller.getAccountBalance("1000", STRING_TEST_TRANSACTION_TIME);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(result.getBody()).isEqualTo(balanceDTO);
@@ -44,22 +44,10 @@ class LedgerPostingControllerUnitTest {
 
     @Test
     void shouldPostLedgerAndReturnOK() {
-        List<LedgerEntry> ledgerEntries = List.of(
-                new LedgerEntry(new LedgerAccount(
-                        UUID.randomUUID(),
-                        "1000",
-                        "test",
-                        0.0,
-                        null),
-                        100,  TransactionType.CR, "Something", test_datetime),
-                new LedgerEntry(new LedgerAccount(
-                        UUID.randomUUID(),
-                        "1100",
-                        "test2",
-                        0.0,
-                        null),
-                        100,  TransactionType.CR, "Something", test_datetime));
-
+        List<LedgerTransactionDTO> ledgerEntries = List.of(
+                new LedgerTransactionDTO("1000","test",100.0,  TransactionType.CR, "Something", STRING_TEST_TRANSACTION_TIME),
+                new LedgerTransactionDTO("1100","test2",100.0,  TransactionType.DB, "Something", STRING_TEST_TRANSACTION_TIME)
+        );
         ResponseEntity<Void> result = controller.postLedgerEntry(ledgerEntries);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
     }

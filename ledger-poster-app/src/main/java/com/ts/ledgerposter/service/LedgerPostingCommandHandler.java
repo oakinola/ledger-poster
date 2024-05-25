@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -24,14 +26,14 @@ public class LedgerPostingCommandHandler {
 
     public void handle(PostLedgerEntryCommand command) {
 
-        command.entries().forEach(entry -> {
+        command.entries().forEach(transactionEntry -> {
                 final LedgerAccountPostedEvent event =  LedgerAccountPostedEvent.builder()
                         .id(UUID.randomUUID())
-                        .accountNumber(entry.getTransactionAccount().getAccountNumber())
-                        .accountName(entry.getTransactionAccount().getAccountName())
-                        .accountBalance(entry.getTransactionAmount())
-                        .lastUpdated(entry.getTransactionTime())
-                        .transactionType(entry.getTransactionType())
+                        .accountNumber(transactionEntry.getAccountNumber())
+                        .accountName(transactionEntry.getAccountName())
+                        .accountBalance(transactionEntry.getTransactionAmount())
+                        .lastUpdated(LocalDateTime.parse(transactionEntry.getTransactionTime(), DateTimeFormatter.ISO_DATE_TIME))
+                        .transactionType(transactionEntry.getTransactionType())
                         .build();
 
                 saveEvent(event);

@@ -1,6 +1,6 @@
 package com.ts.ledgerposter.es.events;
 
-import com.ts.ledgerposter.domain.TransactionType;
+import com.ts.ledgerposter.dto.TransactionType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

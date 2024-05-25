@@ -1,8 +1,6 @@
 package com.ts.ledgerposter.dto;
 
-import java.time.LocalDateTime;
-
-public record LedgerAccountBalanceDTO(
+public record LedgerAccountBalanceResponseDTO(
         String accountNumber,
         double accountBalance) {
 }
