@@ -43,7 +43,6 @@ class LedgerPostingControllerIntegrationTest {
     public static final String INVALID_DATETIME_STRING = "2024-15-22T26:00:00";
     public static final String TRANSACTION_BALANCE_DATETIME_STRING = "2024-05-22T23:00:00";
 
-    public static final LocalDateTime TRANSACTION_BALANCE_DATETIME = LocalDateTime.parse(TRANSACTION_BALANCE_DATETIME_STRING, DateTimeFormatter.ISO_DATE_TIME);
     @Autowired
     private MockMvc mockMvc;
     @MockBean
@@ -57,7 +56,7 @@ class LedgerPostingControllerIntegrationTest {
     void shouldGetTheAccountBalance() throws Exception {
         LedgerAccountBalanceResponseDTO balanceDTO = new LedgerAccountBalanceResponseDTO(ACCOUNT_NUMBER_3100, 100.0);
         doNothing().when(validator).validateGetBalanceRequest(ACCOUNT_NUMBER_3100, TRANSACTION_BALANCE_DATETIME_STRING);
-        when(queryHandler.handle(new GetAccountBalanceQuery(ACCOUNT_NUMBER_3100, TRANSACTION_BALANCE_DATETIME))).thenReturn(balanceDTO);
+        when(queryHandler.handle(new GetAccountBalanceQuery(ACCOUNT_NUMBER_3100, TRANSACTION_BALANCE_DATETIME_STRING))).thenReturn(balanceDTO);
         mockMvc.perform(get("/v1/account-balance/3100")
                         .param("timestamp", "2024-05-22T23:00:00"))
                 .andExpect(status().isOk())
@@ -65,7 +64,7 @@ class LedgerPostingControllerIntegrationTest {
                 .andExpect(jsonPath("$.accountBalance", is(100.0)))
                 .andDo(print());
         verify(validator).validateGetBalanceRequest(ACCOUNT_NUMBER_3100, TRANSACTION_BALANCE_DATETIME_STRING);
-        verify(queryHandler).handle(new GetAccountBalanceQuery(ACCOUNT_NUMBER_3100, TRANSACTION_BALANCE_DATETIME));
+        verify(queryHandler).handle(new GetAccountBalanceQuery(ACCOUNT_NUMBER_3100, TRANSACTION_BALANCE_DATETIME_STRING));
     }
 
     @Test
@@ -83,8 +82,8 @@ class LedgerPostingControllerIntegrationTest {
     @Test
     public void givenNoneExistingAccountNumber_whenGetBalanceCalled_shouldReturnNotFoundStatus() throws Exception {
         doNothing().when(validator).validateGetBalanceRequest(NONE_EXISTING_ACCOUNT_NUMBER_5100, TRANSACTION_BALANCE_DATETIME_STRING);
-        when(queryHandler.handle(new GetAccountBalanceQuery(NONE_EXISTING_ACCOUNT_NUMBER_5100, TRANSACTION_BALANCE_DATETIME)))
-                .thenThrow(new LedgerAccountNotFoundException(NONE_EXISTING_ACCOUNT_NUMBER_5100, TRANSACTION_BALANCE_DATETIME));
+        when(queryHandler.handle(new GetAccountBalanceQuery(NONE_EXISTING_ACCOUNT_NUMBER_5100, TRANSACTION_BALANCE_DATETIME_STRING)))
+                .thenThrow(new LedgerAccountNotFoundException(NONE_EXISTING_ACCOUNT_NUMBER_5100, TRANSACTION_BALANCE_DATETIME_STRING));
 
         mockMvc.perform(get("/v1/account-balance/5100")
                         .param("timestamp", TRANSACTION_BALANCE_DATETIME_STRING))
@@ -94,15 +93,15 @@ class LedgerPostingControllerIntegrationTest {
                 .andDo(print());
 
         verify(validator).validateGetBalanceRequest(NONE_EXISTING_ACCOUNT_NUMBER_5100, TRANSACTION_BALANCE_DATETIME_STRING);
-        verify(queryHandler).handle(new GetAccountBalanceQuery(NONE_EXISTING_ACCOUNT_NUMBER_5100, TRANSACTION_BALANCE_DATETIME));
+        verify(queryHandler).handle(new GetAccountBalanceQuery(NONE_EXISTING_ACCOUNT_NUMBER_5100, TRANSACTION_BALANCE_DATETIME_STRING));
     }
 
 
     @Test
     void givenValidData_whenPostLedgerEntry_thenReturnOK() throws Exception {
         List<LedgerTransactionDTO> transactions = List.of(
-                new LedgerTransactionDTO(ACCOUNT_NUMBER_3100,"test",1000.0,  TransactionType.CR, "Some Desc", TRANSACTION_BALANCE_DATETIME_STRING),
-                new LedgerTransactionDTO(ACCOUNT_NUMBER_3200,"test2",1000.0,  TransactionType.DB, "Some Desc", TRANSACTION_BALANCE_DATETIME_STRING)
+                new LedgerTransactionDTO(null, ACCOUNT_NUMBER_3100,"test",1000.0,  TransactionType.CR, "Some Desc", TRANSACTION_BALANCE_DATETIME_STRING),
+                new LedgerTransactionDTO(null, ACCOUNT_NUMBER_3200,"test2",1000.0,  TransactionType.DB, "Some Desc", TRANSACTION_BALANCE_DATETIME_STRING)
         );
 
         doNothing().when(validator).validatePostLedgerEntryRequest(transactions);
@@ -119,8 +118,8 @@ class LedgerPostingControllerIntegrationTest {
     @Test
     void givenAnyInvalidData_whenPostLedgerEntry_thenBadRequest() throws Exception {
         List<LedgerTransactionDTO> invalidTransactions = List.of(
-                new LedgerTransactionDTO(ACCOUNT_NUMBER_3200,"test",1000.0,  TransactionType.CR, "Some Desc", INVALID_DATETIME_STRING),
-                new LedgerTransactionDTO(ACCOUNT_NUMBER_3200,"test2",1700.0,  null, "Some Desc", INVALID_DATETIME_STRING)
+                new LedgerTransactionDTO(null, ACCOUNT_NUMBER_3200,"test",1000.0,  TransactionType.CR, "Some Desc", INVALID_DATETIME_STRING),
+                new LedgerTransactionDTO(null, ACCOUNT_NUMBER_3200,"test2",1700.0,  null, "Some Desc", INVALID_DATETIME_STRING)
         );
 
         doThrow(new InvalidLedgerPostingDataException("Some data pass in is invalid")).when(validator).validatePostLedgerEntryRequest(invalidTransactions);

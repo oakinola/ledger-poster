@@ -9,6 +9,8 @@ import com.ts.ledgerposter.repository.LedgerAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -16,7 +18,10 @@ import java.util.Optional;
 public class LedgerPostingQueryHandler {
     private final LedgerAccountRepository ledgerAccountRepository;
     public LedgerAccountBalanceResponseDTO handle(GetAccountBalanceQuery command) {
-        Optional<LedgerAccount> optionalLedgerAccount = ledgerAccountRepository.findByAccountNumberAndLastUpdated(command.accountNumber(), command.timestamp());
+        Optional<LedgerAccount> optionalLedgerAccount = ledgerAccountRepository
+                .findByAccountNumberAndLastUpdated(command.accountNumber(),
+                        LocalDateTime.parse(command.timestamp(), DateTimeFormatter.ISO_DATE_TIME));
+
         if (optionalLedgerAccount.isPresent()) {
             return LedgerAccountMapper.buildLedgerAccountBalanceResponseDTOFromLedgerAccount(optionalLedgerAccount.get());
         } else {
