@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ts.ledgerposter.domain.LedgerAccount;
 import com.ts.ledgerposter.dto.LedgerAccountPostedEventDTO;
 import com.ts.ledgerposter.dto.LedgerAccountTransactionDTO;
-import com.ts.ledgerposter.es.events.LedgerAccountPostedEvent;
 import com.ts.ledgerposter.mappers.LedgerAccountMapper;
 import com.ts.ledgerposter.repository.LedgerAccountRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +37,6 @@ public class LedgerAccountProjector {
         LedgerAccountTransactionDTO ledgerAccountTransactionDTO = LedgerAccountMapper.buildLedgerAccountTransactionDTOFromLedgerAccountPostedEventDTO(eventDTO);
 
         Optional<LedgerAccount> optionalLedgerAccount = ledgerAccountRepository.findByAccountNumber(ledgerAccountTransactionDTO.accountNumber());
-        //Optional<LedgerAccount> optionalLedgerAccount = ledgerAccountRepository.findById(ledgerAccountTransactionDTO.id());
         if (optionalLedgerAccount.isPresent()) {
             LedgerAccount transactionAccount = optionalLedgerAccount.get();
             transactionAccount.setAccountName(ledgerAccountTransactionDTO.accountName());

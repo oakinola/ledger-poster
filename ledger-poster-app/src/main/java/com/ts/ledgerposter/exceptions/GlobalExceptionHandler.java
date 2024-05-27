@@ -22,6 +22,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return super.handleExceptionInternal(ex, body, headers, statusCode, request);
     }
 
+    @ExceptionHandler(Exception.class)
+    protected ResponseEntity<Object> handleGenericException(Exception ex, WebRequest request) {
+        log.error("Unexpected Exception", ex);
+        return handleExceptionInternal(ex, new ErrorResponseDTO("LPS_0100", "Unexpected Exception"), new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
+    }
+
     @ExceptionHandler(LedgerAccountNotFoundException.class)
     protected ResponseEntity<Object> handleAccountNotFoundException(LedgerAccountNotFoundException ex, WebRequest request) {
         return handleExceptionInternal(ex, new ErrorResponseDTO("LPS_0001", String.format("Account specified not found: %s", ex.getAccountNumber())), new HttpHeaders(), HttpStatus.NOT_FOUND, request);

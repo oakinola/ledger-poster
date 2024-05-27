@@ -2,8 +2,8 @@ package com.ts.ledgerposter.controllers;
 
 import com.ts.ledgerposter.cqrs.commands.PostLedgerEntryCommand;
 import com.ts.ledgerposter.cqrs.queries.GetAccountBalanceQuery;
-import com.ts.ledgerposter.dto.LedgerTransactionDTO;
 import com.ts.ledgerposter.dto.LedgerAccountBalanceResponseDTO;
+import com.ts.ledgerposter.dto.LedgerTransactionDTO;
 import com.ts.ledgerposter.service.LedgerPostingCommandHandler;
 import com.ts.ledgerposter.service.LedgerPostingQueryHandler;
 import com.ts.ledgerposter.validators.LedgerPostingValidator;
@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -35,8 +33,7 @@ public class LedgerPostingController {
     @GetMapping(value = "/account-balance/{accountNumber}")
     public ResponseEntity<LedgerAccountBalanceResponseDTO> getAccountBalance(@PathVariable String accountNumber, @RequestParam String timestamp) {
         validator.validateGetBalanceRequest(accountNumber, timestamp);
-        LocalDateTime datetime = LocalDateTime.parse(timestamp, DateTimeFormatter.ISO_DATE_TIME);
-        final var result = queryHandler.handle(new GetAccountBalanceQuery(accountNumber, datetime));
+        final var result = queryHandler.handle(new GetAccountBalanceQuery(accountNumber, timestamp));
         log.info("Get account balance result: '{}'", result);
         return ResponseEntity.ok(result);
     }
